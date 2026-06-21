@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Una sorpresa para ti</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: #dde8f5;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; font-family: 'Georgia', serif; overflow: hidden;
+        }
+
+        /* ── FONDO DINÁMICO (LLUVIA PPULBATU) ── */
+        .fondo-animado {
+            position: fixed; inset: 0; z-index: 0;
+            pointer-events: none; overflow: hidden;
+        }
+        .elemento-fondo {
+            position: absolute;
+            top: -150px;
+            object-fit: contain;
+            animation: caer var(--duracion, 15s) linear infinite;
+        }
+        @keyframes caer {
+            0%   { transform: translateY(0) rotate(0deg);    opacity: 0; }
+            10%  { opacity: var(--opacidad-max); }
+            90%  { opacity: var(--opacidad-max); }
+            100% { transform: translateY(115vh) rotate(360deg); opacity: 0; }
+        }
+        .f-soobin,  .f-beomgyu  { --opacidad-max: 0.65; width: 110px; }
+        .f-yeonjun, .f-taehyun, .f-huening { --opacidad-max: 0.28; width: 70px; }
+        @media (min-width: 768px) {
+            .f-soobin,  .f-beomgyu  { width: 160px; }
+            .f-yeonjun, .f-taehyun, .f-huening { width: 100px; }
+        }
+        .p1  { left: 5%;  --duracion: 14s; animation-delay: 0s;  }
+        .p2  { left: 15%; --duracion: 18s; animation-delay: 3s;  }
+        .p3  { left: 28%; --duracion: 15s; animation-delay: 7s;  }
+        .p4  { left: 40%; --duracion: 20s; animation-delay: 1s;  }
+        .p5  { left: 52%; --duracion: 16s; animation-delay: 9s;  }
+        .p6  { left: 65%; --duracion: 19s; animation-delay: 4s;  }
+        .p7  { left: 78%; --duracion: 14s; animation-delay: 11s; }
+        .p8  { left: 90%; --duracion: 17s; animation-delay: 2s;  }
+        .p9  { left: 10%; --duracion: 22s; animation-delay: 5s;  }
+        .p10 { left: 35%; --duracion: 13s; animation-delay: 8s;  }
+        .p11 { left: 58%; --duracion: 21s; animation-delay: 6s;  }
+        .p12 { left: 82%; --duracion: 16s; animation-delay: 13s; }
+
+        /* ── BARRA DE MÚSICA ── */
+        .music-bar {
+            background: rgba(240, 246, 255, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(100, 150, 210, 0.40);
+            border-radius: 40px;
+            padding: 10px 18px;
+            display: flex; align-items: center; gap: 12px;
+            box-shadow: 0 4px 20px rgba(50, 90, 160, 0.13);
+            cursor: pointer;
+            transition: box-shadow 0.3s, transform 0.2s;
+            white-space: nowrap;
+            position: relative; z-index: 10;
+        }
+        .music-bar:hover {
+            box-shadow: 0 6px 24px rgba(50, 90, 160, 0.22);
+            transform: translateY(-2px);
+        }
+        .music-icon {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: #6a9fd8;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: background 0.3s;
+        }
+        .music-bar:hover .music-icon { background: #4d87c7; }
+        .music-icon svg { width: 13px; height: 13px; fill: #fff; }
+        .music-info { display: flex; flex-direction: column; gap: 3px; }
+        .music-title { font-size: 12px; color: #1a3a5c; font-family: 'Georgia', serif; letter-spacing: 0.03em; }
+        .music-wave { display: flex; align-items: flex-end; gap: 2px; height: 12px; }
+        .music-wave span {
+            display: block; width: 3px; background: #6a9fd8;
+            border-radius: 2px; animation: wave 1.2s ease-in-out infinite;
+        }
+        .music-wave span:nth-child(1){height:5px;  animation-delay:0s}
+        .music-wave span:nth-child(2){height:10px; animation-delay:.15s}
+        .music-wave span:nth-child(3){height:7px;  animation-delay:.3s}
+        .music-wave span:nth-child(4){height:12px; animation-delay:.45s}
+        .music-wave span:nth-child(5){height:6px;  animation-delay:.6s}
+        .music-wave.paused span { animation-play-state: paused; }
+        @keyframes wave {
+            0%,100%{ transform: scaleY(1); }
+            50%    { transform: scaleY(0.3); }
+        }
+
+        /* ── SLIDER DE VOLUMEN ── */
+        .volume-control {
+            display: flex; align-items: center; gap: 6px;
+            border-left: 1px solid rgba(196,164,130,0.35);
+            padding-left: 10px; margin-left: 2px;
+        }
+        .volume-icon { font-size: 13px; line-height: 1; color: #1a3a5c; opacity: 0.7; flex-shrink: 0; }
+        .volume-slider {
+            -webkit-appearance: none; appearance: none;
+            width: 70px; height: 3px;
+            background: linear-gradient(to right, #6a9fd8 var(--val,30%), rgba(100,150,210,0.25) var(--val,30%));
+            border-radius: 3px; outline: none; cursor: pointer;
+        }
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 13px; height: 13px; border-radius: 50%;
+            background: #6a9fd8; cursor: pointer;
+            box-shadow: 0 1px 4px rgba(50,90,160,0.25);
+            transition: background 0.2s, transform 0.15s;
+        }
+        .volume-slider::-webkit-slider-thumb:hover { background: #4d87c7; transform: scale(1.2); }
+        .volume-slider::-moz-range-thumb {
+            width: 13px; height: 13px; border-radius: 50%; border: none;
+            background: #6a9fd8; cursor: pointer;
+        }
+        .inicio-contenedor {
+            display: flex; flex-direction: column; align-items: center; gap: 24px;
+            z-index: 2;
+        }
+
+        /* ── SOBRE MEJORADO ── */
+        .sobre-wrapper {
+            position: relative;
+            width: 340px; height: 220px;
+            cursor: pointer;
+            transition: transform 0.6s cubic-bezier(0.34,1.56,0.64,1), opacity 0.6s ease;
+            filter: drop-shadow(0 16px 32px rgba(30,70,130,0.28));
+        }
+        .sobre-wrapper:hover {
+            transform: translateY(-6px) scale(1.02);
+            filter: drop-shadow(0 22px 40px rgba(30,70,130,0.35));
+        }
+
+        /* Cuerpo principal con textura y gradiente rico */
+        .sobre-body {
+            position: absolute; inset: 0;
+            background: linear-gradient(145deg,
+                #cce0f8 0%, #a8c8f0 20%, #7aaee0 50%, #4d87c7 80%, #2d6aaa 100%);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        /* Brillo superior izquierdo */
+        .sobre-body::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 45%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.22) 0%, transparent 100%);
+            border-radius: 8px 8px 0 0;
+        }
+        /* Patrón de líneas diagonales sutiles */
+        .sobre-body::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: repeating-linear-gradient(
+                -45deg,
+                transparent 0px, transparent 18px,
+                rgba(255,255,255,0.04) 18px, rgba(255,255,255,0.04) 19px
+            );
+        }
+
+        /* Borde decorativo dorado interno */
+        .sobre-borde {
+            position: absolute; inset: 6px;
+            border: 1.5px solid rgba(180,215,255,0.45);
+            border-radius: 4px;
+            z-index: 1; pointer-events: none;
+        }
+
+        /* Solapa inferior */
+        .sobre-solapa-abajo {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+            clip-path: polygon(0% 100%, 50% 48%, 100% 100%);
+            background: linear-gradient(170deg, #3a78c0 0%, #2560a8 100%);
+            z-index: 1;
+        }
+        /* Sombra interna solapa inferior */
+        .sobre-solapa-abajo::after {
+            content: '';
+            position: absolute; inset: 0;
+            clip-path: polygon(0% 100%, 50% 48%, 100% 100%);
+            background: linear-gradient(170deg, rgba(0,0,0,0.08) 0%, transparent 60%);
+        }
+
+        /* Solapas laterales */
+        .sobre-lateral-izq {
+            position: absolute; inset: 0;
+            clip-path: polygon(0% 0%, 50% 48%, 0% 100%);
+            background: linear-gradient(90deg, #5a90d0 0%, #7aaee0 100%);
+            z-index: 2;
+        }
+        .sobre-lateral-der {
+            position: absolute; inset: 0;
+            clip-path: polygon(100% 0%, 50% 48%, 100% 100%);
+            background: linear-gradient(270deg, #3a78c0 0%, #5a90d0 100%);
+            z-index: 2;
+        }
+
+        /* Solapa superior (tapa) */
+        .sobre-solapa-arriba {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            clip-path: polygon(0% 0%, 50% 55%, 100% 0%);
+            background: linear-gradient(170deg, #d8eeff 0%, #90c0f0 40%, #5a90d0 100%);
+            transform-origin: top center;
+            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 3;
+        }
+        /* Brillo en la solapa superior */
+        .sobre-solapa-arriba::after {
+            content: '';
+            position: absolute; inset: 0;
+            clip-path: polygon(0% 0%, 50% 55%, 100% 0%);
+            background: linear-gradient(160deg, rgba(255,255,255,0.25) 0%, transparent 55%);
+        }
+
+        /* Sello corazón con efecto de quiebre */
+        .sello-contenedor {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -42%);
+            width: 88px; height: 88px;
+            z-index: 4; pointer-events: none;
+        }
+        .mitad-corazon {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 3px 8px rgba(30,70,130,0.30));
+            transition: transform 0.6s cubic-bezier(0.4,0,0.2,1), opacity 0.5s ease;
+        }
+        .mitad-sup {
+            clip-path: polygon(0% 0%, 100% 0%, 100% 51%, 75% 46%, 50% 53%, 25% 45%, 0% 51%);
+            transform-origin: top center;
+        }
+        .mitad-inf {
+            clip-path: polygon(0% 51%, 25% 45%, 50% 53%, 75% 46%, 100% 51%, 100% 100%, 0% 100%);
+            transform-origin: bottom center;
+        }
+        .sobre-wrapper.abierto .mitad-sup { transform: translateY(-40px) rotate(-6deg); opacity: 0.7; }
+        .sobre-wrapper.abierto .mitad-inf { transform: translateY(28px)  rotate(4deg);  opacity: 0.7; }
+        .sobre-wrapper.abierto { transform: scale(0.82) translateY(-25px); opacity: 0; pointer-events: none; }
+
+        /* Pequeñas estrellas decorativas en las esquinas del sobre */
+        .sobre-estrella {
+            position: absolute; font-size: 13px; z-index: 5;
+            pointer-events: none; opacity: 0.7;
+            animation: parpadeo 2.5s ease-in-out infinite;
+        }
+        .sobre-estrella:nth-child(1) { top: 10px; left: 12px;  animation-delay: 0s; }
+        .sobre-estrella:nth-child(2) { top: 10px; right: 12px; animation-delay: 0.8s; }
+        .sobre-estrella:nth-child(3) { bottom: 12px; left: 14px;  animation-delay: 1.5s; }
+        .sobre-estrella:nth-child(4) { bottom: 12px; right: 14px; animation-delay: 0.4s; }
+        @keyframes parpadeo {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50%       { opacity: 0.3; transform: scale(0.7); }
+        }
+
+        /* Texto "click para abrir" */
+        .sobre-hint {
+            position: absolute; bottom: -26px; left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Times New Roman', serif; font-size: 12px;
+            color: #1a3a5c; opacity: 0.5; white-space: nowrap;
+            letter-spacing: 0.05em;
+            animation: pulso 2s ease-in-out infinite;
+        }
+        @keyframes pulso {
+            0%, 100% { opacity: 0.5; }
+            50%       { opacity: 0.9; }
+        }
+
+        /* ── CARTA ── */
+        .carta-contenedor {
+            position: absolute;
+            width: 90%; max-width: 460px; height: 82vh;
+            display: none; opacity: 0; transform: translateY(50px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            z-index: 5;
+            flex-direction: column;
+        }
+        .carta-contenedor.visible {
+            display: flex; opacity: 1; transform: translateY(0);
+        }
+
+        .carta-music-bar {
+            flex-shrink: 0;
+            margin-bottom: 12px;
+            align-self: center;
+        }
+
+        /* ── PÁGINAS ── */
+        .paginas-wrapper { position: relative; flex: 1; overflow: hidden; }
+        .pagina {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-size: 100% 100%; background-repeat: no-repeat; background-position: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.28); border-radius: 10px;
+            padding: 40px 40px 20px 40px;
+            display: none; flex-direction: column; opacity: 0; transition: opacity 0.5s ease;
+        }
+        .pagina.activa { display: flex; opacity: 1; z-index: 2; }
+
+        /* ── TEXTO ── */
+        .texto-carta {
+            width: 100%; flex-grow: 1; border: none; background: transparent;
+            font-family: 'Georgia', serif; font-size: 17px; line-height: 1.7;
+            color: #1a3a5c; resize: none; outline: none; text-align: center;
+            overflow-y: auto; margin-bottom: 12px;
+        }
+        .texto-carta::-webkit-scrollbar { width: 4px; }
+        .texto-carta::-webkit-scrollbar-thumb { background: rgba(50,90,160,0.2); border-radius: 2px; }
+
+        /* ── CONTROLES NAVEGACIÓN ── */
+        .controles {
+            display: flex; justify-content: space-between;
+            align-items: center; width: 100%; flex-shrink: 0; padding: 0 4px;
+        }
+        .controles.derecha   { justify-content: flex-end; }
+        .controles.izquierda { justify-content: flex-start; }
+        .btn-nav {
+            background: rgba(230, 242, 255, 0.88);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(100, 150, 210, 0.4);
+            border-radius: 50%;
+            width: 42px; height: 42px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 3px 14px rgba(50,90,160,0.12);
+            transition: box-shadow 0.3s, transform 0.2s, background 0.2s;
+        }
+        .btn-nav:hover {
+            background: rgba(220,238,255,0.98);
+            box-shadow: 0 5px 18px rgba(50,90,160,0.2);
+            transform: translateY(-1px);
+        }
+        .btn-nav svg {
+            width: 18px; height: 18px; fill: none;
+            stroke: #1a3a5c; stroke-width: 2.2;
+            stroke-linecap: round; stroke-linejoin: round;
+        }
+        .pag-indicador {
+            font-size: 11px; color: rgba(26,58,92,0.50);
+            font-family: 'Georgia', serif; letter-spacing: 0.1em;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- FONDO DINÁMICO — lluvia de PPULBATU -->
+    <div class="fondo-animado">
+        <!-- Soobin y Beomgyu: protagonistas, más grandes y opacos -->
+        <img src="Soobin.jpg"  class="elemento-fondo f-soobin  p1"  alt="Soobin">
+        <img src="Beomgyu.jpg" class="elemento-fondo f-beomgyu p3"  alt="Beomgyu">
+        <img src="Soobin.jpg"  class="elemento-fondo f-soobin  p5"  alt="Soobin">
+        <img src="Beomgyu.jpg" class="elemento-fondo f-beomgyu p7"  alt="Beomgyu">
+        <img src="Soobin.jpg"  class="elemento-fondo f-soobin  p9"  alt="Soobin">
+        <img src="Beomgyu.jpg" class="elemento-fondo f-beomgyu p11" alt="Beomgyu">
+        <!-- Resto: secundarios, más pequeños y tenues -->
+        <img src="Yeonjun.jpg" class="elemento-fondo f-yeonjun p2"  alt="Yeonjun">
+        <img src="Taehyun.jpg" class="elemento-fondo f-taehyun p4"  alt="Taehyun">
+        <img src="Huening.jpg" class="elemento-fondo f-huening p6"  alt="Huening">
+        <img src="Yeonjun.jpg" class="elemento-fondo f-yeonjun p8"  alt="Yeonjun">
+        <img src="Taehyun.jpg" class="elemento-fondo f-taehyun p10" alt="Taehyun">
+        <img src="Huening.jpg" class="elemento-fondo f-huening p12" alt="Huening">
+    </div>
+
+    <audio id="musica-fondo" src="musica.mp3" loop></audio>
+
+    <!-- PANTALLA DE INICIO -->
+    <div class="inicio-contenedor" id="inicio-contenedor">
+
+        <p style="font-family: 'Times New Roman', serif; font-size: 14px; color: #1a3a5c; opacity: 0.75; text-align: center; letter-spacing: 0.02em;">Baja un poco el volumen 🧙‍♂️👻👻👻</p>
+
+        <div class="music-bar" onclick="alternarMusica()">
+            <div class="music-icon">
+                <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg id="icon-pause" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </div>
+            <div class="music-info">
+                <span class="music-title">🎵 Over the Moon</span>
+                <div class="music-wave paused" id="music-wave">
+                    <span></span><span></span><span></span><span></span><span></span>
+                </div>
+            </div>
+            <div class="volume-control" onclick="event.stopPropagation()">
+                <span class="volume-icon">🔈</span>
+                <input type="range" class="volume-slider" id="vol-slider" min="0" max="1" step="0.01" value="0.3" oninput="cambiarVolumen(this)">
+            </div>
+        </div>
+
+        <div class="sobre-wrapper" id="sobre" onclick="abrirCarta()">
+            <div class="sobre-body"></div>
+            <div class="sobre-borde"></div>
+            <div class="sobre-solapa-abajo"></div>
+            <div class="sobre-lateral-izq"></div>
+            <div class="sobre-lateral-der"></div>
+            <div class="sobre-solapa-arriba" id="solapa-arriba"></div>
+            <!-- Estrellas decorativas -->
+            <span class="sobre-estrella">✦</span>
+            <span class="sobre-estrella">✦</span>
+            <span class="sobre-estrella">✦</span>
+            <span class="sobre-estrella">✦</span>
+            <!-- Sello corazón con quiebre -->
+            <div class="sello-contenedor">
+                <img src="corazon.jpg" alt="Sello Superior" class="mitad-corazon mitad-sup">
+                <img src="corazon.jpg" alt="Sello Inferior" class="mitad-corazon mitad-inf">
+            </div>
+            <span class="sobre-hint">✉ toca para abrir</span>
+        </div>
+    </div>
+
+    <!-- CARTA -->
+    <div class="carta-contenedor" id="carta">
+
+        <p style="font-family: 'Times New Roman', serif; font-size: 13px; color: #1a3a5c; opacity: 0.70; text-align: center; letter-spacing: 0.02em; flex-shrink: 0; margin-bottom: 4px;">Baja un poco el volumen 🧙‍♂️👻👻👻</p>
+        <div class="music-bar carta-music-bar" onclick="alternarMusica()">
+            <div class="music-icon">
+                <svg id="icon-play-carta" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg id="icon-pause-carta" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </div>
+            <div class="music-info">
+                <span class="music-title">🎵 Over the Moon</span>
+                <div class="music-wave paused" id="music-wave-carta">
+                    <span></span><span></span><span></span><span></span><span></span>
+                </div>
+            </div>
+            <div class="volume-control" onclick="event.stopPropagation()">
+                <span class="volume-icon">🔈</span>
+                <input type="range" class="volume-slider" id="vol-slider-carta" min="0" max="1" step="0.01" value="0.3" oninput="cambiarVolumen(this)">
+            </div>
+        </div>
+
+        <div class="paginas-wrapper">
+
+            <!-- ✏️ PÁGINA 1 — edita el texto aquí abajo -->
+            <div class="pagina activa" id="pag-1" style="background-image: url('fondo_carta.jpg');">
+ola                <textarea class="texto-carta" readonly>
+
+                </textarea>
+                <div class="controles derecha">
+                    <span class="pag-indicador">1 / 3</span>
+                    <button class="btn-nav" onclick="cambiarPagina(1)">
+                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ✏️ PÁGINA 2 — edita el texto aquí abajo -->
+            <div class="pagina" id="pag-2" style="background-image: url('fondo_carta.jpg');">
+                <textarea class="texto-carta" readonly>
+...estar a tu lado se siente como haber encontrado mi propio pedacito de cielo, mi propio Heaven.
+
+Gracias por cada sonrisa que me regalas, por tu apoyo y por ser esa persona que me hace sentir "over the moon" con solo un mensaje. Eres mi única certeza en medio de todo.
+                </textarea>
+                <div class="controles">
+                    <button class="btn-nav" onclick="cambiarPagina(-1)">
+                        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                    </button>
+                    <span class="pag-indicador">2 / 3</span>
+                    <button class="btn-nav" onclick="cambiarPagina(1)">
+                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ✏️ PÁGINA 3 — edita el texto aquí abajo -->
+            <div class="pagina" id="pag-3" style="background-image: url('fondo_carta.jpg');">
+                <textarea class="texto-carta" readonly>
+Esta cartita es solo un pequeño detalle para recordarte lo mucho que te quiero y lo importante que eres para mí.
+
+Forever with you. Te amo hoy, mañana y siempre... ¡And over the moon! 🌙✨
+
+[Tu Nombre]
+                </textarea>
+                <div class="controles izquierda">
+                    <button class="btn-nav" onclick="cambiarPagina(-1)">
+                        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                    </button>
+                    <span class="pag-indicador">3 / 3</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const musica     = document.getElementById('musica-fondo');
+        const waves      = document.querySelectorAll('.music-wave');
+        const iconPlays  = [document.getElementById('icon-play'), document.getElementById('icon-play-carta')];
+        const iconPauses = [document.getElementById('icon-pause'), document.getElementById('icon-pause-carta')];
+
+        // Volumen inicial suave (30%)
+        musica.volume = 0.3;
+
+        function cambiarVolumen(slider) {
+            const val = parseFloat(slider.value);
+            musica.volume = val;
+            // Sincronizar ambos sliders
+            document.querySelectorAll('.volume-slider').forEach(s => {
+                s.value = val;
+                s.style.setProperty('--val', (val * 100) + '%');
+            });
+            // Icono dinámico
+            document.querySelectorAll('.volume-icon').forEach(ic => {
+                ic.textContent = val === 0 ? '🔇' : val < 0.4 ? '🔈' : val < 0.7 ? '🔉' : '🔊';
+            });
+        }
+
+        // Inicializar estilo del slider
+        document.querySelectorAll('.volume-slider').forEach(s => {
+            s.style.setProperty('--val', '30%');
+        });
+
+        function actualizarBarra(on) {
+            waves.forEach(w => on ? w.classList.remove('paused') : w.classList.add('paused'));
+            iconPlays.forEach(i  => i.style.display = on ? 'none'  : 'block');
+            iconPauses.forEach(i => i.style.display = on ? 'block' : 'none');
+        }
+
+        function alternarMusica() {
+            if (musica.paused) { musica.play(); actualizarBarra(true); }
+            else               { musica.pause(); actualizarBarra(false); }
+        }
+
+        function abrirCarta() {
+            const inicio = document.getElementById('inicio-contenedor');
+            const sobre  = document.getElementById('sobre');
+            const carta  = document.getElementById('carta');
+
+            document.getElementById('solapa-arriba').style.transform = 'rotateX(180deg)';
+            sobre.classList.add('abierto');
+
+            setTimeout(() => {
+                inicio.style.display = 'none';
+                carta.classList.add('visible');
+                if (musica.paused) {
+                    musica.play().catch(() => {});
+                    actualizarBarra(true);
+                }
+            }, 650);
+        }
+
+        let paginaActual = 1;
+        function cambiarPagina(dir) {
+            document.getElementById('pag-' + paginaActual).classList.remove('activa');
+            paginaActual += dir;
+            document.getElementById('pag-' + paginaActual).classList.add('activa');
+        }
+    </script>
+
+</body>
+</html>
