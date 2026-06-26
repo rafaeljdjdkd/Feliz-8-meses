@@ -451,6 +451,7 @@
 
             <!-- ✏️ PÁGINA 1 — edita el texto aquí abajo -->
             <div class="pagina activa" id="pag-1" style="background-image: url('fondo_carta.jpg');">
+                <div class="fecha-carta"></div>
                 <textarea class="texto-carta" readonly>Han pasado 8 meses desde que tú y yo somos novios
 
 Y quisiera decirte que todo ha sido hermoso en la vida contigo a mi lado, alado tuyo la vida se llena de color y realmente quiero agradecerte por dejarme entrar a tu vida, sé que tal vez no sea perfecto en esto y cometa errores, pero realmente quiero estar el resto de mi vida contigo, eres la persona que quiero a mi lado.
@@ -460,7 +461,7 @@ Tal vez esto solo sea un amor adolescente o algo así pero sinceramente no quier
 Solo con sentirte a lado mío logras que todos los problemas y el ruido desaparezca y solo quedemos tú y yo, lo que es realmente hermoso, en realidad no se bien expresar todo lo que siento por ti pero quiero que sepas que todo esto es más que real, quiero estar contigo el resto de mis días
                 </textarea>
                 <div class="controles derecha">
-                    <span class="pag-indicador">1 / 2</span>
+                    <span class="pag-indicador">1 / 3</span>
                     <button class="btn-nav" onclick="cambiarPagina(1)" style="margin-left: 8px;">
                         <svg viewBox="0 0 24 24"><path d="M9 19l7-7-7-7"/></svg>
                     </button>
@@ -482,7 +483,23 @@ Siempre que estoy contigo no me importa nada el resto de la gente, solo quiero q
                     <button class="btn-nav" onclick="cambiarPagina(-1)" style="margin-right: 8px;">
                         <svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
                     </button>
-                    <span class="pag-indicador">2 / 2</span>
+                    <button class="btn-nav" onclick="cambiarPagina(1)">
+                        <svg viewBox="0 0 24 24"><path d="M9 19l7-7-7-7"/></svg>
+                    </button>
+                    <span class="pag-indicador">2 / 3</span>
+                </div>
+            </div>
+
+            <!-- ✏️ PÁGINA 3 — fecha de hoy -->
+            <div class="pagina" id="pag-3" style="background-image: url('fondo_carta.jpg');">
+                <div class="fecha-carta">25/junio/2026</div>
+                <textarea class="texto-carta" readonly>Más que besarte, más que el roce de tus dedos, me das un abrazo y la sensación de calidez y amor que siento en cada uno es como ahogarme en un mar infinito del que nunca quisiera encontrar tierra. Se que nunca te he preguntado lo que sientes, pero lo que yo siento es que te entrego cada parte de mí, la sensación de querer estar unido eternamente a ti. Deseando que el abrazo nunca termine y que el tiempo se detenga, aunque fuera en la penumbra del vacío de este mundo, nada me importaría mientras te tenga a mi lado.
+                </textarea>
+                <div class="controles izquierda">
+                    <button class="btn-nav" onclick="cambiarPagina(-1)" style="margin-right: 8px;">
+                        <svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+                    </button>
+                    <span class="pag-indicador">3 / 3</span>
                 </div>
             </div>
 
